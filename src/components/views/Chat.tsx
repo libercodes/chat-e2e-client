@@ -9,17 +9,19 @@ import styled from 'styled-components';
 import * as chatThunks from '../../redux/chat.reducer';
 import { RootState } from '../../redux/root.reducer';
 import { Message } from '../../types/apiResponse.types';
-import { DisconnectEvent, EnumBESocketEvents } from '../../types/types';
+import { DisconnectEvent, EnumBESocketEvents, EnumSocketClientEvents } from '../../types/types';
 import NavbarComponent from '../layouts/Navbar';
 
-import {
-  Message as MessageProto,
-} from '../../config/proto/bundle';
-import { socket } from '../../services/chat.service';
+import { socket } from '../../config/socket';
 
 const {
   BE_ADD_MESSAGE,
 } = EnumBESocketEvents;
+
+const {
+  ADD_MESSAGE,
+  DISCONNECT,
+} = EnumSocketClientEvents;
 
 const Chat = ({ messages, ...props }: Props) => {
   const [showModal, setShowModal] = useState(true);
@@ -30,8 +32,21 @@ const Chat = ({ messages, ...props }: Props) => {
   const [isScrollAtBottom, setIsScrollAtBottom] = useState(true);
 
   useEffect(() => {
-    console.log('joining socket');
-    socket.emit('join', props.room?.code);
+    let isMounted = true;
+    if (isMounted) {
+      console.log('joining socket');
+      socket.emit('join', props.room?.code);
+      socket.on(ADD_MESSAGE, (data: Message) => {
+        props.addMessage(data);
+      });
+      socket.on(DISCONNECT, (data: DisconnectEvent) => {
+        props.disconnectFromEvent(data);
+      });
+    }
+
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   useEffect(() => {
@@ -39,7 +54,7 @@ const Chat = ({ messages, ...props }: Props) => {
       if (lastMessageElement.current) {
         if (isScrollAtBottom) {
           lastMessageElement?.current!.scrollIntoView({
-            block: 'end',
+            block: 'start',
             behavior: 'smooth',
           });
         }
@@ -82,8 +97,7 @@ const Chat = ({ messages, ...props }: Props) => {
       date: new Date().toString(),
     };
 
-    const encoded = MessageProto.encode(message).finish();
-    socket.emit(BE_ADD_MESSAGE, encoded);
+    socket.emit(BE_ADD_MESSAGE, message);
     setInputText('');
   };
 
@@ -125,14 +139,28 @@ const Chat = ({ messages, ...props }: Props) => {
                     messages.map((message) => (
                       <Row
                         ref={lastMessageElement}
+                        // eslint-disable-next-line react/no-array-index-key
                       >
                         <Col>
-                          <p>
-                            {`[${new Date(message.date).toLocaleTimeString()}] `}
-                            <CustomSpan color="#fefb62">{`(${message.user})   `}</CustomSpan>
-                            <CustomSpan>{`${message.text}`}</CustomSpan>
+                          {
+                            props.systemName === message.user
+                              ? (
+                                <p>
+                                  {`[${new Date(message.date).toLocaleTimeString()}] `}
+                                  <CustomSpan color="gray">{`${message.text}`}</CustomSpan>
 
-                          </p>
+                                </p>
+                              )
+                              : (
+                                <p>
+                                  {`[${new Date(message.date).toLocaleTimeString()}] `}
+                                  <CustomSpan color="#fefb62">{`(${message.user})   `}</CustomSpan>
+                                  <CustomSpan>{`${message.text}`}</CustomSpan>
+
+                                </p>
+                              )
+                          }
+
                         </Col>
                       </Row>
                     ))
@@ -154,8 +182,7 @@ const Chat = ({ messages, ...props }: Props) => {
 };
 
 const ScrollableCol = styled(Col)`
-    height: 80%;
-    max-height:60vh;
+    height: 60vh;
     display: flex;
     flex-direction: column;
     padding: 0 2rem;
@@ -182,7 +209,6 @@ const ScrollableCol = styled(Col)`
 `;
 
 const ChatColumn = styled(Col)`
-    height: 60vh;
     width: 50vw;
     padding: 0;
     display: flex;

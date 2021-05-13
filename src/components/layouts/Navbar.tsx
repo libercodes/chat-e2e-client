@@ -10,10 +10,7 @@ import { RootState } from '../../redux/root.reducer';
 import * as chatThunks from '../../redux/chat.reducer';
 import { DisconnectEvent, EnumBESocketEvents } from '../../types/types';
 
-import {
-  DisconnectEvent as DisconnectEventProto,
-} from '../../config/proto/bundle';
-import { socket } from '../../services/chat.service';
+import { socket } from '../../config/socket';
 
 const {
   BE_DISCONNECT,
@@ -34,8 +31,7 @@ const NavbarComponent = ({ code, disconnect, myuser }: Props) => {
         user: myuser,
       };
 
-      const encoded = DisconnectEventProto.encode(obj).finish();
-      socket.emit(BE_DISCONNECT, encoded);
+      socket.emit(BE_DISCONNECT, obj);
     } catch (error) {
       // eslint-disable-next-line no-console
       console.log(error);
@@ -72,7 +68,7 @@ const NavbarComponent = ({ code, disconnect, myuser }: Props) => {
 };
 
 const NavbarCustom = styled(Navbar)`
-
+  position: static;
 `;
 const mapStateToProps = (state: RootState) => ({
   code: state.chat.room?.code,
