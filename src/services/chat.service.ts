@@ -4,7 +4,8 @@ import { ApiResponse, Room } from '../types/apiResponse.types';
 
 dotenv.config();
 
-const apiUrl = process.env.API_URL || 'http://localhost:5000';
+export const defaultUrl = 'http://localhost:5000';
+const apiUrl = process.env.API_URL || defaultUrl;
 
 export const createChatRoom = async (): Promise<Room> => {
   const res = await axios.post<ApiResponse<Room>>(`${apiUrl}/chat`);
