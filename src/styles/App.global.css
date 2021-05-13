@@ -1,0 +1,19 @@
+* {
+    padding: 0;
+    margin: 0;
+}
+
+body {
+    width: 100vw;
+    height: 100vh;
+    background-color:  rgb(41, 39, 39);
+    color: rgb(0, 189, 0);
+}
+#root {
+    height: 100vh;
+}
+
+.fullheight {
+    height: 100%;
+    overflow: hidden;
+}
