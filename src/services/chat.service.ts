@@ -1,5 +1,5 @@
 import axios from 'axios';
-import * as dotenv from 'dotenv';
+import dotenv from 'dotenv';
 import { ApiResponse, Room } from '../types/apiResponse.types';
 
 dotenv.config();
