@@ -1,9 +1,11 @@
 export interface Room {
+  name?: string
   code: string
   startedAt: Date
-  endedAt?: Date
+  isPublic: boolean
+  participants: number
+  lastActivity: Date
 }
-
 export interface Message {
   user: string
   text: string

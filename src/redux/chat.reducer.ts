@@ -1,8 +1,9 @@
 // TYPES
 
 import { v4 } from 'uuid';
+import { isDoStatement } from 'typescript';
 import { Message, Room } from '../types/apiResponse.types';
-import { DisconnectEvent, EnumSocketClientEvents } from '../types/types';
+import { CreateRoomDto, DisconnectEvent, EnumSocketClientEvents } from '../types/types';
 
 import * as chatService from '../services/chat.service';
 import { IChatState } from '../types/state.types';
@@ -12,25 +13,32 @@ enum EnumChatActionTypes {
   CREATE_CHAT = 'CREATE_CHAT',
   DISCONNECT_CHAT = 'DISCONNECT_CHAT',
   SET_USER = 'SET_USER',
+  SET_CURRENT_ROOM = 'SET_CURRENT_ROOM',
+  LEAVE_ROOM = 'LEAVE_ROOM',
 
 }
 
 type ChatAction =
     | { type: EnumSocketClientEvents.ADD_MESSAGE, payload: Message }
     | { type: EnumSocketClientEvents.DISCONNECT, payload: DisconnectEvent }
-    | { type: EnumChatActionTypes.JOIN_CHAT, payload: Room }
-    | { type: EnumChatActionTypes.CREATE_CHAT, payload: Room }
     | { type: EnumChatActionTypes.DISCONNECT_CHAT, payload: null }
-    | { type: EnumChatActionTypes.SET_USER, payload: string };
+    | { type: EnumChatActionTypes.SET_USER, payload: string }
+    | { type: EnumChatActionTypes.SET_CURRENT_ROOM, payload: Room }
+    | { type: EnumChatActionTypes.LEAVE_ROOM, payload: undefined };
 
 // ACTION CREATORS
-export const joinChatAC = (payload: Room): ChatAction => ({
-  type: EnumChatActionTypes.JOIN_CHAT,
+export const setCurrentRoomAC = (payload: Room): ChatAction => ({
+  type: EnumChatActionTypes.SET_CURRENT_ROOM,
   payload,
 });
 
+export const leaveRoomAC = (): ChatAction => ({
+  type: EnumChatActionTypes.LEAVE_ROOM,
+  payload: undefined,
+});
+
 export const createChatAC = (payload: Room): ChatAction => ({
-  type: EnumChatActionTypes.CREATE_CHAT,
+  type: EnumChatActionTypes.SET_CURRENT_ROOM,
   payload,
 });
 
@@ -54,13 +62,21 @@ export const setUserAC = (payload: string): ChatAction => ({
 });
 
 // THUNKS
-export const joinChat = (id: string) => async (dispatch: any) => {
+export const getChatRoom = (id: string) => async (dispatch: any) => {
   const res = await chatService.joinChatRoom(id);
-  dispatch(joinChatAC(res));
+  dispatch(setCurrentRoomAC(res));
 };
 
-export const createChat = () => async (dispatch: any) => {
-  const res = await chatService.createChatRoom();
+export const setCurrentRoom = (room: Room) => (dispatch: any) => {
+  dispatch(setCurrentRoomAC(room));
+};
+
+export const leaveRoom = (room: Room) => (dispatch: any) => {
+  dispatch(leaveRoomAC());
+};
+
+export const createChat = (dto: CreateRoomDto) => async (dispatch: any) => {
+  const res = await chatService.createChatRoom(dto);
   dispatch(createChatAC(res));
 };
 
@@ -107,8 +123,7 @@ export const ChatReducer = (
     case EnumChatActionTypes.DISCONNECT_CHAT:
       return initialState;
 
-    case EnumChatActionTypes.CREATE_CHAT:
-    case EnumChatActionTypes.JOIN_CHAT:
+    case EnumChatActionTypes.SET_CURRENT_ROOM:
       return {
         ...state,
         room: action.payload,
@@ -127,6 +142,8 @@ export const ChatReducer = (
         ...state,
         myuser: action.payload,
       };
+    case EnumChatActionTypes.LEAVE_ROOM:
+      return initialState;
     default:
       return state;
   }

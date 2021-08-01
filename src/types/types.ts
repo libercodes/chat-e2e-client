@@ -12,3 +12,8 @@ export interface DisconnectEvent {
   user: string
   date: Date | string
 }
+
+export interface CreateRoomDto {
+  name: string,
+  isPublic: boolean
+}

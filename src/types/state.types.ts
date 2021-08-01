@@ -7,3 +7,7 @@ export interface IChatState {
   systemName: string
   error: string
 }
+
+export interface IPublicRoomsState {
+  rooms: Room[]
+}
