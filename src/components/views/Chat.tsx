@@ -12,7 +12,7 @@ import { Message } from '../../types/apiResponse.types';
 import { DisconnectEvent, EnumBESocketEvents, EnumSocketClientEvents } from '../../types/types';
 import NavbarComponent from '../layouts/Navbar';
 
-import { socket } from '../../config/socket';
+import { createSocketConnection, socket } from '../../config/socket';
 
 const {
   BE_ADD_MESSAGE,
@@ -34,6 +34,8 @@ const Chat = ({ messages, ...props }: Props) => {
   useEffect(() => {
     let isMounted = true;
     if (isMounted) {
+      createSocketConnection();
+
       console.log('joining socket');
       socket.emit('join', props.room?.code);
       socket.on(ADD_MESSAGE, (data: Message) => {

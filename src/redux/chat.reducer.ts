@@ -71,7 +71,7 @@ export const setCurrentRoom = (room: Room) => (dispatch: any) => {
   dispatch(setCurrentRoomAC(room));
 };
 
-export const leaveRoom = (room: Room) => (dispatch: any) => {
+export const leaveRoom = () => (dispatch: any) => {
   dispatch(leaveRoomAC());
 };
 

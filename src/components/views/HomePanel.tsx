@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import {
-  Tab, Tabs, Col, Button, Form, Row,
+  Tab, Tabs, Col, Button, Form, Row, Alert,
 } from 'react-bootstrap';
 import { connect, ConnectedProps } from 'react-redux';
 // eslint-disable-next-line import/no-extraneous-dependencies
@@ -57,6 +57,7 @@ const HomePanel = (props: Props) => {
 
   const changeTab = (tab: any) => {
     if (isLoading) return;
+    setError('');
     setCurrentTab(tab);
   };
 
@@ -70,6 +71,9 @@ const HomePanel = (props: Props) => {
     >
       <Tab eventKey="join" title="Join Room" disabled={isLoading}>
         <Col md={12} className="mt-3 d-flex justify-content-center align-items-center flex-column">
+          {
+            error.length > 0 && <Alert variant="danger">{error}</Alert>
+          }
           <Form.Control
             onChange={(e) => setCode(e.target.value)}
             placeholder="Room's code"
@@ -88,6 +92,9 @@ const HomePanel = (props: Props) => {
       </Tab>
       <Tab eventKey="create" title="Create room" disabled={isLoading}>
         <Col md={12} className="mt-3 d-flex justify-content-center align-items-center flex-column">
+          {
+            error.length > 0 && <Alert variant="danger">{error}</Alert>
+          }
           <Form.Control
             onChange={(e) => setNewRoom((x) => ({ ...x, name: e.target.value }))}
             placeholder="Room's name"

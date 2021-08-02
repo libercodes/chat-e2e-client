@@ -9,6 +9,7 @@ export const defaultUrl = 'http://localhost:5000';
 const apiUrl = process.env.REACT_APP_API_URL || defaultUrl;
 
 export const createChatRoom = async (dto: CreateRoomDto): Promise<Room> => {
+  console.log(dto);
   const res = await axios.post<ApiResponse<Room>>(`${apiUrl}/chat`, dto);
   const { data } = res.data;
 

@@ -16,7 +16,7 @@ const {
   BE_DISCONNECT,
 } = EnumBESocketEvents;
 
-const NavbarComponent = ({ code, disconnect, myuser }: Props) => {
+const NavbarComponent = ({ code, leaveRoom, myuser }: Props) => {
   const history = useHistory();
   const [btnTitle, setBtnTitle] = useState('Disconnect');
   const [isLoading, setIsLoading] = useState(false);
@@ -24,21 +24,17 @@ const NavbarComponent = ({ code, disconnect, myuser }: Props) => {
   const handleDisconnect = async () => {
     setIsLoading(true);
     setBtnTitle('Loading...');
-    try {
-      await disconnect(code!);
-      const obj: DisconnectEvent = {
-        date: new Date().toString(),
-        user: myuser,
-      };
+    const obj: DisconnectEvent = {
+      date: new Date().toString(),
+      user: myuser,
+    };
 
-      socket.emit(BE_DISCONNECT, obj);
-    } catch (error) {
-      // eslint-disable-next-line no-console
-      console.log(error);
-    }
+    socket.emit(BE_DISCONNECT, obj);
+    leaveRoom();
     history.push('/');
     setIsLoading(false);
   };
+
   return (
     <NavbarCustom bg="dark">
       <Container className="d-flex justify-content-center">
@@ -76,7 +72,7 @@ const mapStateToProps = (state: RootState) => ({
 });
 
 const mapDispatchToProps = (dispatch: any) => ({
-  disconnect: async (id: string) => dispatch(chatThunks.disconnectChat(id)),
+  leaveRoom: () => dispatch(chatThunks.leaveRoom()),
 });
 
 const connectToStore = connect(mapStateToProps, mapDispatchToProps);
