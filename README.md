@@ -14,6 +14,7 @@ These instructions will get you a copy of the project up and running on your loc
 ```python
 REACT_APP_API_URL=http://localhost:5000
 REACT_APP_SOCKET_URL=wss://localhost:5000
+REACT_APP_URL=http://localhost:3000
 ```
 ## Running the API
 - To run the app enter `npm start` in terminal

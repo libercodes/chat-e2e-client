@@ -11,6 +11,7 @@ import * as chatThunks from '../../redux/chat.reducer';
 import { DisconnectEvent, EnumBESocketEvents } from '../../types/types';
 
 import { socket } from '../../config/socket';
+import { url } from '../../config/url';
 
 const {
   BE_DISCONNECT,
@@ -18,7 +19,7 @@ const {
 
 const NavbarComponent = ({ code, leaveRoom, myuser }: Props) => {
   const history = useHistory();
-  const [btnTitle, setBtnTitle] = useState('Disconnect');
+  const [btnTitle, setBtnTitle] = useState('Leave');
   const [isLoading, setIsLoading] = useState(false);
 
   const handleDisconnect = async () => {
@@ -35,9 +36,20 @@ const NavbarComponent = ({ code, leaveRoom, myuser }: Props) => {
     setIsLoading(false);
   };
 
+  const copyInviteToClipBoard = () => {
+    navigator.clipboard.writeText(`${url}/chat/${code}`);
+  };
+
   return (
     <NavbarCustom bg="dark">
-      <Container className="d-flex justify-content-center">
+      <Container className="d-flex justify-content-between">
+        <Button
+          type="button"
+          variant="primary"
+          onClick={() => copyInviteToClipBoard()}
+        >
+          Copy link
+        </Button>
         <Navbar.Brand>
           {`Chat ${code! || ''}`}
         </Navbar.Brand>
