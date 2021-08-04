@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import {
-  Button, Spinner, Container, Navbar,
+  Button, Spinner, Container, Navbar, Overlay, Tooltip,
 } from 'react-bootstrap';
 
 import { connect, ConnectedProps } from 'react-redux';
@@ -21,6 +21,8 @@ const NavbarComponent = ({ code, leaveRoom, myuser }: Props) => {
   const history = useHistory();
   const [btnTitle, setBtnTitle] = useState('Leave');
   const [isLoading, setIsLoading] = useState(false);
+  const [showTooltip, setShowTooltip] = useState(false);
+  const buttonRef = useRef(null);
 
   const handleDisconnect = async () => {
     setIsLoading(true);
@@ -37,7 +39,11 @@ const NavbarComponent = ({ code, leaveRoom, myuser }: Props) => {
   };
 
   const copyInviteToClipBoard = () => {
+    setShowTooltip(true);
     navigator.clipboard.writeText(`${url}/chat/${code}`);
+    setTimeout(() => {
+      setShowTooltip(false);
+    }, 1500);
   };
 
   return (
@@ -47,9 +53,22 @@ const NavbarComponent = ({ code, leaveRoom, myuser }: Props) => {
           type="button"
           variant="primary"
           onClick={() => copyInviteToClipBoard()}
+          ref={buttonRef}
         >
           Copy link
         </Button>
+        <Overlay
+          target={buttonRef.current}
+          show={showTooltip}
+          placement="left"
+        >
+          {(props) => (
+            // eslint-disable-next-line react/jsx-props-no-spreading
+            <Tooltip id="btn-copy-invite" {...props}>
+              Invite link copied to clipboard!
+            </Tooltip>
+          )}
+        </Overlay>
         <Navbar.Brand>
           {`Chat ${code! || ''}`}
         </Navbar.Brand>
