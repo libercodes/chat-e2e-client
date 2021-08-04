@@ -17,7 +17,9 @@ const {
   BE_DISCONNECT,
 } = EnumBESocketEvents;
 
-const NavbarComponent = ({ code, leaveRoom, myuser }: Props) => {
+const NavbarComponent = ({
+  code, leaveRoom, myuser, name,
+}: Props) => {
   const history = useHistory();
   const [btnTitle, setBtnTitle] = useState('Leave');
   const [isLoading, setIsLoading] = useState(false);
@@ -70,7 +72,7 @@ const NavbarComponent = ({ code, leaveRoom, myuser }: Props) => {
           )}
         </Overlay>
         <Navbar.Brand>
-          {`Chat ${code! || ''}`}
+          {name! || ''}
         </Navbar.Brand>
         <Button
           type="button"
@@ -100,6 +102,7 @@ const NavbarCustom = styled(Navbar)`
 const mapStateToProps = (state: RootState) => ({
   code: state.chat.room?.code,
   myuser: state.chat.myuser,
+  name: state.chat.room?.name,
 });
 
 const mapDispatchToProps = (dispatch: any) => ({

@@ -135,6 +135,7 @@ export const ChatReducer = (
           date: new Date(),
           text: `User ${action.payload.user} left the chat.`,
           user: state.systemName,
+          id: v4(),
         }],
       };
     case EnumChatActionTypes.SET_USER:

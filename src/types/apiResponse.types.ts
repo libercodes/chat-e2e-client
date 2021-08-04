@@ -7,6 +7,7 @@ export interface Room {
   lastActivity: Date
 }
 export interface Message {
+  id: string
   user: string
   text: string
   date: Date | string

@@ -1,11 +1,12 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   FormControlProps,
-  Button, Col, Form, Modal, Row,
+  Button, Col, Form, Modal, Row, OverlayTrigger, Tooltip,
 } from 'react-bootstrap';
 
 import { ConnectedProps, connect } from 'react-redux';
 import styled from 'styled-components';
+import { v4 } from 'uuid';
 import * as chatThunks from '../../redux/chat.reducer';
 import { RootState } from '../../redux/root.reducer';
 import { Message } from '../../types/apiResponse.types';
@@ -93,6 +94,7 @@ const Chat = ({ messages, ...props }: Props) => {
     if (!InputEvent) return;
 
     const message: Message = {
+      id: v4(),
       text: inputText,
       user: props.myuser,
       date: new Date().toString(),
@@ -137,7 +139,18 @@ const Chat = ({ messages, ...props }: Props) => {
                 onScroll={() => handleScroll()}
               >
                 {
-                    messages.map((message) => (
+                  messages.map((message) => (
+                    <OverlayTrigger
+                      key={`message${message.id}`}
+                      placement="left"
+                      // eslint-disable-next-line @typescript-eslint/no-shadow
+                      overlay={(props) => (
+                        // eslint-disable-next-line react/jsx-props-no-spreading
+                        <Tooltip {...props} id={message.id}>
+                          {`${new Date(message.date).toLocaleTimeString()}`}
+                        </Tooltip>
+                      )}
+                    >
                       <Row
                         ref={lastMessageElement}
                         // eslint-disable-next-line react/no-array-index-key
@@ -147,24 +160,20 @@ const Chat = ({ messages, ...props }: Props) => {
                             props.systemName === message.user
                               ? (
                                 <p>
-                                  {`[${new Date(message.date).toLocaleTimeString()}] `}
                                   <CustomSpan color="gray">{`${message.text}`}</CustomSpan>
-
                                 </p>
                               )
                               : (
                                 <p>
-                                  {`[${new Date(message.date).toLocaleTimeString()}] `}
                                   <CustomSpan color="#fefb62">{`(${message.user})   `}</CustomSpan>
                                   <CustomSpan>{`${message.text}`}</CustomSpan>
-
                                 </p>
                               )
                           }
-
                         </Col>
                       </Row>
-                    ))
+                    </OverlayTrigger>
+                  ))
                 }
               </ScrollableCol>
 
