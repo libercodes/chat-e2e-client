@@ -45,7 +45,7 @@ const Chat = ({ messages, ...props }: Props) => {
         }
         createSocketConnection();
 
-        socket.emit('join', props.room?.code);
+        socket.emit('join', code);
         socket.on(ADD_MESSAGE, (data: Message) => {
           props.addMessage(data);
         });

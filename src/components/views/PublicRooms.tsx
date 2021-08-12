@@ -13,36 +13,45 @@ const PublicRooms = ({ rooms, setCurrentChatRoom, getPublicRooms }: Props) => {
 
   useEffect(() => {
     let isMounted = true;
+    let interval: any;
+
     if (isMounted) {
       getPublicRooms();
+
+      interval = setInterval(() => {
+        getPublicRooms();
+      }, 5000);
     }
 
-    return () => { isMounted = false; };
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
 
   const joinPublicRoom = async (room: Room) => {
     setCurrentChatRoom(room);
-    history.push('/chat');
+    history.push(`/chat/${room.code}`);
   };
 
   return (
     <Table striped bordered hover variant="dark">
       <thead>
         <tr>
-          <th>Name</th>
-          <th>Last activity</th>
-          <th>Participants</th>
-          <th>#</th>
+          <th className="text-center">Name</th>
+          <th className="text-center">Last activity</th>
+          <th className="text-center">Participants</th>
+          <th className="text-center">#</th>
         </tr>
       </thead>
       <tbody>
         {
             rooms.map((room) => (
               <tr>
-                <td>{room?.name}</td>
-                <td>{room?.lastActivity}</td>
-                <td>{room?.participants}</td>
-                <td>
+                <td className="text-center">{room?.name}</td>
+                <td className="text-center">{new Date(room.lastActivity).toLocaleString()}</td>
+                <td className="text-center">{room?.participants}</td>
+                <td className="text-center">
                   <Button
                     variant="primary"
                     onClick={() => joinPublicRoom(room)}
