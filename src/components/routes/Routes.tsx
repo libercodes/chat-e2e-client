@@ -8,7 +8,7 @@ const Routes = () => (
     <Route exact path="/">
       <Home />
     </Route>
-    <Route path="/chat">
+    <Route path="/chat/:code">
       <Chat />
     </Route>
   </Switch>

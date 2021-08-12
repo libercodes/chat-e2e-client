@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Tab, Tabs, Col, Button, Form, Row, Alert,
 } from 'react-bootstrap';
@@ -6,6 +6,7 @@ import { connect, ConnectedProps } from 'react-redux';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { useHistory } from 'react-router';
 import * as chatThunks from '../../redux/chat.reducer';
+import { RootState } from '../../redux/root.reducer';
 import { CreateRoomDto } from '../../types/types';
 
 const defaultNewRoomValues = {
@@ -21,6 +22,13 @@ const HomePanel = (props: Props) => {
   const [newRoom, setNewRoom] = useState<CreateRoomDto>(defaultNewRoomValues);
   const [isLoading, setIsLoading] = useState(false);
 
+  useEffect(() => {
+    if (props.code) {
+      history.push(`/chat/${props.code}`);
+    }
+  // eslint-disable-next-line react/destructuring-assignment
+  }, [props.code]);
+
   const handleJoinChat = async (event: React.FormEvent) => {
     event.preventDefault();
     setError('');
@@ -31,7 +39,7 @@ const HomePanel = (props: Props) => {
     try {
       await props.getChatRoom(code);
       setIsLoading(false);
-      history.push('/chat');
+      history.push(`/chat/${code}`);
     } catch (e) {
       setError(`Chat room with code ${code} does not exist`);
     }
@@ -48,7 +56,6 @@ const HomePanel = (props: Props) => {
     try {
       await props.createChatRoom(newRoom);
       setIsLoading(false);
-      history.push('/chat');
     } catch (e) {
       setError('An error ocurred, please try again later.');
     }
@@ -122,12 +129,16 @@ const HomePanel = (props: Props) => {
   );
 };
 
+const mapStateToProps = (state: RootState) => ({
+  code: state.chat.room?.code,
+});
+
 const mapDispatchToProps = (dispatch: any) => ({
   getChatRoom: async (id: string) => dispatch(chatThunks.getChatRoom(id)),
   createChatRoom: async (dto: CreateRoomDto) => dispatch(chatThunks.createChat(dto)),
 });
 
-const connectToStore = connect(null, mapDispatchToProps);
+const connectToStore = connect(mapStateToProps, mapDispatchToProps);
 interface Props extends ConnectedProps<typeof connectToStore> {}
 
 export default connectToStore(HomePanel);

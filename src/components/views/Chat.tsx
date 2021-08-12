@@ -1,12 +1,15 @@
 import React, { useEffect, useRef, useState } from 'react';
 import {
   FormControlProps,
-  Button, Col, Form, Modal, Row, OverlayTrigger, Tooltip,
+  Col,
+  Form,
+  Row,
 } from 'react-bootstrap';
 
 import { ConnectedProps, connect } from 'react-redux';
 import styled from 'styled-components';
 import { v4 } from 'uuid';
+import { useParams } from 'react-router-dom';
 import * as chatThunks from '../../redux/chat.reducer';
 import { RootState } from '../../redux/root.reducer';
 import { Message } from '../../types/apiResponse.types';
@@ -14,10 +17,10 @@ import { DisconnectEvent, EnumBESocketEvents, EnumSocketClientEvents } from '../
 import NavbarComponent from '../layouts/Navbar';
 
 import { createSocketConnection, socket } from '../../config/socket';
+import MessageComponent from './MessageComponent';
+import UserModal from './Chat/UserModal';
 
-const {
-  BE_ADD_MESSAGE,
-} = EnumBESocketEvents;
+const { BE_ADD_MESSAGE } = EnumBESocketEvents;
 
 const {
   ADD_MESSAGE,
@@ -31,10 +34,14 @@ const Chat = ({ messages, ...props }: Props) => {
   const lastMessageElement = useRef<HTMLDivElement>(null);
   const containerMessagesElement = useRef<HTMLDivElement>(null);
   const [isScrollAtBottom, setIsScrollAtBottom] = useState(true);
+  const { code } = useParams<{ code: string }>();
 
   useEffect(() => {
     let isMounted = true;
     if (isMounted) {
+      if (!props.room?.code) {
+        props.getChatRoom(code);
+      }
       createSocketConnection();
 
       socket.emit('join', props.room?.code);
@@ -48,6 +55,7 @@ const Chat = ({ messages, ...props }: Props) => {
 
     return () => {
       isMounted = false;
+      socket.disconnect();
     };
   }, []);
 
@@ -104,30 +112,19 @@ const Chat = ({ messages, ...props }: Props) => {
     setInputText('');
   };
 
+  const setInputFormatted = (text: string) => {
+    const formatted = text.trimStart();
+    setInputText(formatted);
+  };
+
   return (
     <Row className="d-flex justify-content-center">
-      <Modal show={showModal} onHide={shouldModalClose}>
-        <Modal.Header>
-          <Modal.Title>Insert username</Modal.Title>
-        </Modal.Header>
-
-        <Modal.Body>
-          <Form.Control
-            placeholder="User123"
-            onChange={(e) => setUserInput(e.target.value)}
-          />
-        </Modal.Body>
-
-        <Modal.Footer>
-          <Button
-            variant="primary"
-            onClick={() => handleSetUser()}
-          >
-            Save changes
-
-          </Button>
-        </Modal.Footer>
-      </Modal>
+      <UserModal
+        showModal={showModal}
+        shouldModalClose={shouldModalClose}
+        setUserInput={setUserInput}
+        handleSetUser={handleSetUser}
+      />
       <Col md={12} sm={12} className="d-flex align-items-center justify-content-center flex-column">
         <Row>
           <ChatColumn md={12} sm={12}>
@@ -140,39 +137,12 @@ const Chat = ({ messages, ...props }: Props) => {
               >
                 {
                   messages.map((message) => (
-                    <OverlayTrigger
-                      key={`message${message.id}`}
-                      placement="left"
-                      // eslint-disable-next-line @typescript-eslint/no-shadow
-                      overlay={(props) => (
-                        // eslint-disable-next-line react/jsx-props-no-spreading
-                        <Tooltip {...props} id={message.id}>
-                          {`${new Date(message.date).toLocaleTimeString()}`}
-                        </Tooltip>
-                      )}
-                    >
-                      <Row
-                        ref={lastMessageElement}
-                        // eslint-disable-next-line react/no-array-index-key
-                      >
-                        <Col>
-                          {
-                            props.systemName === message.user
-                              ? (
-                                <p>
-                                  <CustomSpan color="gray">{`${message.text}`}</CustomSpan>
-                                </p>
-                              )
-                              : (
-                                <p>
-                                  <CustomSpan color="#fefb62">{`(${message.user})   `}</CustomSpan>
-                                  <CustomSpan>{`${message.text}`}</CustomSpan>
-                                </p>
-                              )
-                          }
-                        </Col>
-                      </Row>
-                    </OverlayTrigger>
+                    <MessageComponent
+                      message={message}
+                      systemName={props.systemName}
+                      lastMessageElement={lastMessageElement}
+                      currentUser={userInput}
+                    />
                   ))
                 }
               </ScrollableCol>
@@ -180,7 +150,7 @@ const Chat = ({ messages, ...props }: Props) => {
             </Row>
             <TextBox
               placeholder="Write something..."
-              onChange={(e: any) => setInputText(e.target.value)}
+              onChange={(e: any) => setInputFormatted(e.target.value)}
               value={inputText}
               onKeyDown={handleSend}
             />
@@ -219,7 +189,7 @@ const ScrollableCol = styled(Col)`
 `;
 
 const ChatColumn = styled(Col)`
-    width: 50vw;
+    width: 60vw;
     padding: 0;
     display: flex;
     flex-direction: column;
@@ -238,9 +208,6 @@ const CustomSpan = styled.span`
 
 const TextBox = styled(Form.Control)<FormControlProps>`
     height: 3rem;
-    position: absolute;
-    bottom: 0;
-    left: 0;
     background-color: #3b3b3b;
     border: none;
     color: inherit;
@@ -258,6 +225,7 @@ const mapDispatchToProps = (dispatch: any) => ({
   addMessage: (message: Message) => dispatch(chatThunks.addMessage(message)),
   disconnectFromEvent: (value: DisconnectEvent) => dispatch(chatThunks.disconnectFromRoom(value)),
   disconnect: (id: string) => dispatch(chatThunks.disconnectChat(id)),
+  getChatRoom: async (id: string) => dispatch(chatThunks.getChatRoom(id)),
 });
 
 const mapStateToProps = (state: RootState) => ({
