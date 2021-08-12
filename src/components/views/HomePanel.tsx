@@ -87,9 +87,8 @@ const HomePanel = (props: Props) => {
             value={code}
           />
           <Button
-            className="mt-3"
+            className="mt-3 btn-pink"
             type="submit"
-            variant="primary"
             onClick={(e) => handleJoinChat(e)}
             disabled={!code || isLoading}
           >
@@ -115,9 +114,8 @@ const HomePanel = (props: Props) => {
             label="Make room public"
           />
           <Button
-            className="mt-3"
+            className="mt-3 btn-pink"
             type="submit"
-            variant="primary"
             onClick={(e) => handleCreateChatRoom(e)}
             disabled={!newRoom.name || isLoading}
           >

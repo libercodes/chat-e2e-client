@@ -71,9 +71,9 @@ const NavbarComponent = ({
             </Tooltip>
           )}
         </Overlay>
-        <Navbar.Brand>
+        <h2 className="chat-title">
           {name! || ''}
-        </Navbar.Brand>
+        </h2>
         <Button
           type="button"
           variant="danger"

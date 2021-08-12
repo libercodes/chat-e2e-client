@@ -9,7 +9,7 @@ const UserModal = ({
 }: Props) => (
   <Modal show={showModal} onHide={shouldModalClose}>
     <Modal.Header>
-      <Modal.Title>Insert username</Modal.Title>
+      <Modal.Title className="title-black">Insert username</Modal.Title>
     </Modal.Header>
 
     <Modal.Body>

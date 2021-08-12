@@ -20,7 +20,7 @@ const MessageComponent = ({
 }: Props) => (
   <OverlayTrigger
     key={`message${message.id}`}
-    placement="left"
+    placement={currentUser === message.user ? 'right' : 'left'}
                       // eslint-disable-next-line @typescript-eslint/no-shadow
     overlay={(props) => (
       // eslint-disable-next-line react/jsx-props-no-spreading
@@ -31,7 +31,11 @@ const MessageComponent = ({
   >
     <Row
       ref={lastMessageElement}
-      className={currentUser === message.user ? 'd-flex justify-content-end my-2' : 'd-flex justify-content-start my-2'}
+      className={
+        // eslint-disable-next-line no-nested-ternary
+        currentUser === message.user ? 'd-flex justify-content-end my-2'
+          : systemName === message.user ? 'd-flex justify-content-center my-2' : 'd-flex justify-content-start my-2'
+      }
     >
       <MessageContainer
         myuser={currentUser === message.user}
@@ -39,18 +43,16 @@ const MessageComponent = ({
         {
           systemName === message.user
             ? (
-              <p>
-                <CustomSpan color="gray">{`${message.text}`}</CustomSpan>
-              </p>
+              <CustomSpan color="gray">{`${message.text}`}</CustomSpan>
             )
             : (
-              <p>
+              <>
                 {
                   message.user !== currentUser
-                  && <CustomSpan color="#fefb62">{`(${message.user})   `}</CustomSpan>
+                  && <CustomSpan color="#e91363">{`${message.user}`}</CustomSpan>
                 }
                 <CustomSpan>{`${message.text}`}</CustomSpan>
-              </p>
+              </>
             )
         }
       </MessageContainer>
@@ -63,13 +65,15 @@ const CustomSpan = styled.span`
 `;
 
 const MessageContainer = styled.div<{ myuser: boolean }>`
-  background-color: ${(props) => (props.myuser ? 'royalblue' : 'green')};
-  border-radius: 10px;
+  background-color: ${(props) => (props.myuser ? 'royalblue' : '#242323')};
+  border-radius: 25px;
   display: flex;
-  max-width: 50%;
+  flex-direction: column;
+  max-width: 60%;
   padding: 0.5rem;
   line-break: break-word;
   hyphens: auto;
+  color:white;
 `;
 
 export default MessageComponent;

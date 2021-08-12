@@ -39,18 +39,22 @@ const Chat = ({ messages, ...props }: Props) => {
   useEffect(() => {
     let isMounted = true;
     if (isMounted) {
-      if (!props.room?.code) {
-        props.getChatRoom(code);
-      }
-      createSocketConnection();
+      const setUpRoom = async () => {
+        if (!props.room?.code) {
+          await props.getChatRoom(code);
+        }
+        createSocketConnection();
 
-      socket.emit('join', props.room?.code);
-      socket.on(ADD_MESSAGE, (data: Message) => {
-        props.addMessage(data);
-      });
-      socket.on(DISCONNECT, (data: DisconnectEvent) => {
-        props.disconnectFromEvent(data);
-      });
+        socket.emit('join', props.room?.code);
+        socket.on(ADD_MESSAGE, (data: Message) => {
+          props.addMessage(data);
+        });
+        socket.on(DISCONNECT, (data: DisconnectEvent) => {
+          props.disconnectFromEvent(data);
+        });
+      };
+
+      setUpRoom();
     }
 
     return () => {
@@ -193,7 +197,7 @@ const ChatColumn = styled(Col)`
     padding: 0;
     display: flex;
     flex-direction: column;
-    background-color: black;
+    background-color: #38383f;
     overflow: hidden;
     @media (max-width: 768px) {
         height: 100vh;
@@ -215,7 +219,7 @@ const TextBox = styled(Form.Control)<FormControlProps>`
     :focus {
         outline: none;
         background-color: #4d4c4c;
-        color: rgb(0, 189, 0);
+        color: white;
     }
 
 `;
